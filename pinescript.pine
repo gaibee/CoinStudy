@@ -1,0 +1,33 @@
+//@version=5
+strategy("공부용 전략",
+     overlay=true, 
+     default_qty_type = strategy.percent_of_equity,
+     default_qty_value = 100,
+     commission_type = strategy.commission.percent,
+     commission_value = 0.05,
+     margin_long=1,
+     margin_short=1)
+
+// Define moving averages
+sma14 = ta.sma(close, 14)
+sma28 = ta.sma(close, 28)
+
+// Entry Conditions
+longCondition = ta.crossover(sma14, sma28)
+shortCondition = ta.crossunder(sma14, sma28)
+
+// Plotting for visual feedback
+plot(sma14, color=color.purple, title="SMA 14")
+plot(sma28, color=color.orange, title="SMA 28")
+
+// Execute Long
+if (longCondition)
+    strategy.close_all()
+    strategy.entry("My Long Entry Id", strategy.long)
+    alert('buy')
+
+// Execute Short
+if (shortCondition)
+    strategy.close_all()
+    strategy.entry("My Short Entry Id", strategy.short)
+    alert('sell')
