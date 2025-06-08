@@ -1,5 +1,6 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Body
 import uvicorn
+from pydantic import BaseModel
 import pyupbit
 from dotenv import load_dotenv
 import os
@@ -12,9 +13,12 @@ app = FastAPI()
 ACCESS_KEY = os.getenv('UPBIT_ACCESS_KEY')
 SECRET_KEY = os.getenv('UPBIT_SECRET_KEY')
 
-upbit = pyupbit.Upbit(ACCESS_KEY, SECRET_KEY)
+upbit = pyupbit.Upbit(ACCESS_KEY, SECRET_KEY) # 업비트를 다룰 수 있는 모델 초기화 
 
 FEE_RATE = 0.0005 # 업비트 수수료 0.05%
+
+class TVMessage(BaseModel):
+    type:str
 
 
 @app.get('/test_buy')
@@ -43,9 +47,8 @@ def index():
     return '나의 서버에 온걸 환영합니다'
 
 @app.post('/tv_message')
-async def tv_message(request: Request):
-    body = await request.body()
-    message = body.decode("utf-8").strip().lower()
+async def tv_message(raw_data: str = Body(..., media_type="text/plain")):
+    message = raw_data
 
     if message == "buy":
         try:
