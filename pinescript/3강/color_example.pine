@@ -1,0 +1,14 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © cyjreds
+
+//@version=5
+indicator("공부 예시용 Indicator", overlay = true)
+
+// 7시간 이동평균선 값을 가져옴
+sma = ta.sma(close, 7) 
+
+// 이동평균선을 그려줌
+plot(sma) 
+
+// 이동평균값이 종가보다 높으면 배경색을 RGB d0ff00값의 투명도 80으로 설정함. 아니면 아무 것도 안함(na)
+bgcolor(sma > close ? color.new(#d0ff00, 80) : na)

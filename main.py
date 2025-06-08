@@ -4,10 +4,12 @@ from pydantic import BaseModel
 import pyupbit
 from dotenv import load_dotenv
 import os
+from routes.dashboard import router as dashboard_router
 
 load_dotenv() # .env 파일을 불러온다.
 
 app = FastAPI()
+app.include_router(dashboard_router)
 
 # 환경변수 또는 직접 입력
 ACCESS_KEY = os.getenv('UPBIT_ACCESS_KEY')
@@ -72,14 +74,14 @@ async def tv_message(raw_data: str = Body(..., media_type="text/plain")): # POST
 
     if message == "buy": # 만약 전송된 데이터가 "buy"라는 문자열이라면
         try:
-            result = _buy_full_market_order("KRW-BTC") # buy_full_market_morder 함수를 실행
+            result = _buy_full_market_order("KRW-ETH") # buy_full_market_morder 함수를 실행
             return {"status": "buy", "result": result}
         except Exception as e:
             return {"status": "failed", "reason": str(e)}
 
     elif message == "sell": # 만약 전송된 데이터가 "sell"라는 문자열이라면
         try:
-            result = _sell_full_market_order("KRW-BTC") # sell_full_market_morder 함수를 실행
+            result = _sell_full_market_order("KRW-ETH") # sell_full_market_morder 함수를 실행
             return {"status": "buy", "result": result}
         except Exception as e:
             return {"status": "failed", "reason": str(e)}
