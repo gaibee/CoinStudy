@@ -17,55 +17,78 @@ upbit = pyupbit.Upbit(ACCESS_KEY, SECRET_KEY) # 업비트를 다룰 수 있는 �
 
 FEE_RATE = 0.0005 # 업비트 수수료 0.05%
 
-class TVMessage(BaseModel):
-    type:str
 
+# 일반 함수들 #################################################
 
-@app.get('/test_buy')
-def buy_full_market_order(ticker:str):
-    krw_balance = upbit.get_balance("KRW")
+def _buy_full_market_order(ticker:str):
+    krw_balance = upbit.get_balance("KRW") # 내 업비트 계정에서 원화 잔고를 가져옴
     if not krw_balance:
         raise Exception('잔고를 가져올 수 없습니다.')
         
     if not krw_balance > 5000: # 최소 매수 금액 고려
         raise Exception('잔고가 5000원 미만입니다.')
         
-    krw_to_use = krw_balance * (1 - FEE_RATE)
-    return upbit.buy_market_order(ticker, krw_to_use)
+    krw_to_use = krw_balance * (1 - FEE_RATE) # 잔고에서 수수류를 뺀 나머지를 계산
+    return upbit.buy_market_order(ticker, krw_to_use) # 시장가 주문으로 전체 원화만큼 매수
 
-@app.get('/test_sell')
-def sell_full_market_order(ticker:str):
-    btc_balance = upbit.get_balance(ticker)
-    if not btc_balance:
-        raise Exception('BTC 잔고를 가져올 수 없습니다.')
+def _sell_full_market_order(ticker:str):
+    ticker_balance = upbit.get_balance(ticker) # 내 업비트 계정에서 코인 잔고를 가져옴
+    if not ticker_balance:
+        raise Exception(f'{ticker} 잔고를 가져올 수 없습니다.')
         
-    return upbit.sell_market_order(ticker, btc_balance)
+    return upbit.sell_market_order(ticker, ticker_balance) # 시장가 주문으로 코인 전체를 매도함
 
-    
-@app.get('/')
+####################################################################
+
+
+
+
+
+
+
+# 서버 접속 주소들 정의 ###############################################
+
+@app.get('/') # http://내주소:포트/ 로 GET 요청이 오면 아래 함수를 실행함
 def index():
     return '나의 서버에 온걸 환영합니다'
 
-@app.post('/tv_message')
-async def tv_message(raw_data: str = Body(..., media_type="text/plain")):
-    message = raw_data
+@app.get('/test_buy') # http://내주소:포트/test_buy로 GET 요청이 오면 아래 함수를 실행함
+def test_buy(ticker:str): # http://내주소:포트/test_buy?ticker=매수할코인 링크로 요청이 오면 매수할코인을 ticker 변수에 저장
+    try:
+        return _buy_full_market_order(ticker)
+    except Exception as e:
+        return {"status":"failed", "reason":str(e)}
 
-    if message == "buy":
+@app.get('/test_sell') # http://내주소:포트/test_sell로 GET 요청이 오면 아래 함수를 실행함
+def test_sell(ticker:str): # http://내주소:포트/test_buy?ticker=매수할코인 링크로 요청이 오면 매수할코인을 ticker 변수에 저장
+    try:
+        return _sell_full_market_order(ticker)
+    except Exception as e:
+        return {"status":"failed", "reason":str(e)}
+    
+@app.post('/tv_message') # http://내주소:포트/tv_message로 POST 요청이 오면 아래 함수를 실행함
+async def tv_message(raw_data: str = Body(..., media_type="text/plain")): # POST 요청이 오면 전송된 데이터를 raw_data에 저장함
+    message = raw_data # raw_data를 message 변수에 저장함
+
+    if message == "buy": # 만약 전송된 데이터가 "buy"라는 문자열이라면
         try:
-            result = buy_full_market_order("KRW-BTC")
+            result = _buy_full_market_order("KRW-BTC") # buy_full_market_morder 함수를 실행
             return {"status": "buy", "result": result}
         except Exception as e:
             return {"status": "failed", "reason": str(e)}
 
-    elif message == "sell":
+    elif message == "sell": # 만약 전송된 데이터가 "sell"라는 문자열이라면
         try:
-            result = sell_full_market_order("KRW-BTC")
+            result = _sell_full_market_order("KRW-BTC") # sell_full_market_morder 함수를 실행
             return {"status": "buy", "result": result}
         except Exception as e:
             return {"status": "failed", "reason": str(e)}
 
     else:
         return {"status": "ignored", "message": message}
+
+#####################################################################3
+
 
 
 if __name__ == '__main__':
