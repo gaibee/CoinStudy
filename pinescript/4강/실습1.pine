@@ -1,0 +1,13 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © cyjreds
+
+//@version=5
+indicator("공부 예시용 Indicator", overlay = true)
+
+sma_period = input.int(7, 'sma 주기값')
+
+// 7시간 이동평균선 값을 가져옴
+sma = ta.sma(close, sma_period) 
+
+// 이동평균선을 그려줌
+plot(sma, color=color.purple) 
