@@ -1,0 +1,25 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © cyjreds
+
+//@version=5
+strategy(
+ title = "공부 예시용 Strategy",
+ overlay = true,
+ initial_capital = 10000,
+ process_orders_on_close = true,
+ slippage = 2,
+ default_qty_type = strategy.percent_of_equity,
+ default_qty_value = 100,
+ commission_type = strategy.commission.percent,
+ commission_value = 0.05
+ )
+
+rsi_source = input.source(high, 'rsi source')
+rsi_period = input.int(14, 'rsi period')
+
+rsi_value = ta.rsi(rsi_source, rsi_period)
+
+if rsi_value < 30
+    strategy.entry('id_buy', strategy.long)
+else if rsi_value > 70
+    strategy.close('id_buy')
