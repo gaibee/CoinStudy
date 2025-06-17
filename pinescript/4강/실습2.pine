@@ -1,0 +1,14 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © cyjreds
+
+//@version=5
+indicator("공부 예시용 Indicator", overlay = false)
+
+rsi_source = input.source(high, 'rsi source')
+rsi_period = input.int(14, 'rsi period')
+
+rsi_value = ta.rsi(rsi_source, rsi_period)
+
+plot(rsi_value, color=rsi_value < 30 ? color.blue : color.green)
+plot(30, color=color.red)
+plot(70, color=color.red)
