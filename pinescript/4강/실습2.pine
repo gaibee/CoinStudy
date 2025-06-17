@@ -1,14 +1,19 @@
-// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
-// © cyjreds
-
 //@version=5
-indicator("공부 예시용 Indicator", overlay = false)
+indicator("공부 예시용 indicator", overlay=false)
 
-rsi_source = input.source(high, 'rsi source')
-rsi_period = input.int(14, 'rsi period')
+// 사용자 입력
+rsiSource = input.source(close, title="RSI Source")
+rsiLength = input.int(14, title="RSI Length")
 
-rsi_value = ta.rsi(rsi_source, rsi_period)
+// RSI 계산
+rsiValue = ta.rsi(rsiSource, rsiLength)
 
-plot(rsi_value, color=rsi_value < 30 ? color.blue : color.green)
-plot(30, color=color.red)
-plot(70, color=color.red)
+// 색상 조건: 30 미만이면 파란색, 그 외엔 초록색
+rsiColor = rsiValue < 30 ? color.blue : color.green
+
+// RSI 차트 그리기
+plot(rsiValue, title="RSI", color=rsiColor, linewidth=2)
+
+// 기준선 (30, 70) 그리기
+hline(30, "Oversold", color=color.red)
+hline(70, "Overbought", color=color.red)
