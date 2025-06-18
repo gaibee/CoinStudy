@@ -1,0 +1,34 @@
+//@version=5
+strategy("Impulse MACD [LazyBear]", shorttitle="IMACD_LB", overlay=false, default_qty_type = strategy.percent_of_equity, default_qty_value = 100)
+
+lengthMA = input.int(34, title="Length MA")
+lengthSignal = input.int(9, title="Length Signal")
+
+calc_zlema(src, length) =>
+    ema1 = ta.ema(src, length)
+    ema2 = ta.ema(ema1, length)
+    d = ema1 - ema2
+    ema1 + d
+
+src = hlc3
+hi = ta.rma(high, lengthMA)  // SMMA 대신 rma 사용
+lo = ta.rma(low, lengthMA)
+mi = calc_zlema(src, lengthMA)
+
+md = mi > hi ? (mi - hi) : mi < lo ? (mi - lo) : 0
+sb = ta.sma(md, lengthSignal)
+sh = md - sb
+mdc = src > mi ? (src > hi ? color.lime : color.green) : (src < lo ? color.red : color.orange)
+
+plot(0, color=color.gray, linewidth=1, title="MidLine")
+plot(md, color=mdc, linewidth=2, title="ImpulseMACD", style=plot.style_histogram)
+plot(sh, color=color.blue, linewidth=2, title="ImpulseHisto", style=plot.style_histogram)
+plot(sb, color=color.maroon, linewidth=2, title="ImpulseMACDCDSignal")
+
+ebc = input.bool(false, title="Enable bar colors")
+barcolor(ebc ? mdc : na)
+
+if ta.crossover(sb, 0)
+	strategy.entry('id_long', strategy.long)
+else if ta.crossunder(sb, 0)
+	strategy.close_all()
